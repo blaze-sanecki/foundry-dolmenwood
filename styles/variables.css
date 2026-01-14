@@ -1,3 +1,4 @@
+/* Fonts based on Dolmenwood Core Rulebook */
 @font-face {
 	font-family: 'Longdon Decorative';
 	src: url('./fonts/LongdonDecorative.woff2') format('woff2');
@@ -34,6 +35,7 @@
 	--dolmen-font-body: "Poly", serif;
 }
 
+/* Color variables for Dark and Light themes (Dark is WIP) */
 .theme-dark .dolmen {
 	--dolmen-color-background: #141210;
 	--dolmen-color-text: #f2eee9;
