@@ -1,0 +1,137 @@
+/* -------------------------------------------- */
+/*  Tooltips                                    */
+/* -------------------------------------------- */
+
+.tooltip {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.tooltiptext {
+	visibility: hidden;
+	width: 120px;
+	background-color: var(--dolmen-color-h3);
+	color: var(--dolmen-color-background);
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px 0;
+	position: fixed;
+	z-index: 1;
+	margin-left: -65px;
+	margin-bottom: 20px;
+	font-family: var(--dolmen-font-body);
+	letter-spacing: unset;
+	font-weight: normal;
+	align-self: end;
+}
+
+.tooltiptext::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: var(--dolmen-color-h3) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
+/* -------------------------------------------- */
+/*  XP Modal                                    */
+/* -------------------------------------------- */
+
+.xp-modal-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.xp-modal-content .form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.xp-modal-content label {
+	font-weight: bold;
+	font-size: 0.9rem;
+}
+
+.xp-modal-content input {
+	padding: 0.5rem;
+	font-size: 1rem;
+	text-align: center;
+}
+
+.xp-modal-content .xp-calculation {
+	background-color: var(--dolmen-color-inner-background);
+	border: 1px solid var(--dolmen-color-box-border);
+	padding: 0.5rem;
+	text-align: center;
+	font-size: 0.9rem;
+}
+
+.xp-modal-content .xp-total {
+	font-weight: bold;
+	font-size: 1.1rem;
+	color: var(--dolmen-color-h1);
+}
+
+/* -------------------------------------------- */
+/*  Weapon Context Menu                         */
+/* -------------------------------------------- */
+
+.dolmen-weapon-context-menu {
+	background-color: var(--dolmen-color-background);
+	border: 2px solid var(--dolmen-color-h1);
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	z-index: 1000;
+	min-width: 150px;
+	overflow: hidden;
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0.5rem;
+	cursor: pointer;
+	transition: background-color 0.1s;
+	border-bottom: 1px solid var(--dolmen-color-box-background);
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item:last-child {
+	border-bottom: none;
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item:hover {
+	background-color: var(--dolmen-color-h1);
+	color: var(--dolmen-color-background);
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item .weapon-icon {
+	width: 20px;
+	height: 20px;
+	border-radius: 2px;
+	object-fit: cover;
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item .weapon-name {
+	flex: 1;
+	font-size: 0.85rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dolmen-weapon-context-menu .weapon-menu-item .weapon-damage {
+	font-size: 0.75rem;
+	font-weight: bold;
+	opacity: 0.8;
+}

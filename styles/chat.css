@@ -1,0 +1,127 @@
+/* -------------------------------------------- */
+/*  Attack Roll Chat Message Styles             */
+/* -------------------------------------------- */
+
+.dolmen.attack-roll {
+	background-color: var(--dolmen-color-background);
+	border: 2px solid var(--dolmen-color-h1);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.dolmen.attack-roll .attack-header {
+	display: flex;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	background-color: var(--dolmen-color-h1);
+	color: var(--dolmen-color-background);
+	align-items: center;
+}
+
+.dolmen.attack-roll .attack-header .weapon-icon {
+	width: 32px;
+	height: 32px;
+	border: 2px solid var(--dolmen-color-background);
+	border-radius: 4px;
+	object-fit: cover;
+}
+
+.dolmen.attack-roll .attack-header .attack-info h3 {
+	margin: 0;
+	font-size: 0.8rem;
+	font-family: var(--dolmen-font-header);
+	color: var(--dolmen-color-background);
+	text-transform: uppercase;
+}
+
+.dolmen.attack-roll .attack-header .attack-type {
+	font-size: 0.7rem;
+	opacity: 0.8;
+	text-transform: uppercase;
+}
+
+.dolmen.attack-roll .roll-results {
+	display: flex;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+
+.dolmen.attack-roll .roll-section {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	padding: 0.5rem;
+	background-color: var(--dolmen-color-inner-background);
+	border: 1px solid var(--dolmen-color-box-border);
+	border-radius: 4px;
+}
+
+.dolmen.attack-roll .roll-section label {
+	font-size: 0.7rem;
+	color: var(--dolmen-color-h3);
+	text-transform: uppercase;
+	margin-bottom: 0.25rem;
+}
+
+.dolmen.attack-roll .roll-result {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/* Foundry inline roll styling */
+.dolmen.attack-roll .roll-result .inline-roll {
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: var(--dolmen-color-h1);
+	background: none;
+	border: none;
+	padding: 0;
+}
+
+.dolmen.attack-roll .roll-result .inline-roll .inline-result {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+/* Critical hit styling */
+.dolmen.attack-roll .roll-section.critical .inline-roll,
+.dolmen.attack-roll .roll-section.critical .inline-result {
+	color: #228b22;
+}
+
+/* Fumble styling */
+.dolmen.attack-roll .roll-section.fumble .inline-roll,
+.dolmen.attack-roll .roll-section.fumble .inline-result {
+	color: #c00;
+}
+
+.dolmen.attack-roll .roll-result .roll-label {
+	font-size: 0.7rem;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.dolmen.attack-roll .roll-section.critical .roll-label {
+	color: #228b22;
+}
+
+.dolmen.attack-roll .roll-section.fumble .roll-label {
+	color: #c00;
+}
+
+.dolmen.attack-roll .roll-breakdown {
+	font-size: 0.65rem;
+	color: var(--dolmen-color-h3);
+	margin-top: 0.25rem;
+}
+
+.dolmen .inline-result i.fa-solid {
+	color: var(--dolmen-color-h3)
+}
+
+.dolmen .inline-result .dice-icon-hidden i.fa-dice-d20 {
+	display: none;
+}

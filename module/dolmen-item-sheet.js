@@ -1,4 +1,6 @@
 /* global foundry, game, FilePicker */
+import { buildChoices, buildQualityOptions, CHOICE_KEYS } from './utils/choices.js'
+
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ItemSheetV2 } = foundry.applications.sheets
 
@@ -41,59 +43,18 @@ class DolmenItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		context.isGenericItem = this.item.type === 'Item'
 
 		// Weapon choices
-		context.weaponSizeChoices = {
-			small: game.i18n.localize('DOLMEN.Item.Size.small'),
-			medium: game.i18n.localize('DOLMEN.Item.Size.medium'),
-			large: game.i18n.localize('DOLMEN.Item.Size.large')
-		}
-
-		// Weapon qualities for checkboxes
-		context.qualityOptions = [
-			{ id: 'armor-piercing', label: game.i18n.localize('DOLMEN.Item.Quality.armor-piercing') },
-			{ id: 'brace', label: game.i18n.localize('DOLMEN.Item.Quality.brace') },
-			{ id: 'charge', label: game.i18n.localize('DOLMEN.Item.Quality.charge') },
-			{ id: 'melee', label: game.i18n.localize('DOLMEN.Item.Quality.melee') },
-			{ id: 'missile', label: game.i18n.localize('DOLMEN.Item.Quality.missile') },
-			{ id: 'reach', label: game.i18n.localize('DOLMEN.Item.Quality.reach') },
-			{ id: 'reload', label: game.i18n.localize('DOLMEN.Item.Quality.reload') },
-			{ id: 'splash', label: game.i18n.localize('DOLMEN.Item.Quality.splash') },
-			{ id: 'two-handed', label: game.i18n.localize('DOLMEN.Item.Quality.two-handed') },
-			{ id: 'cold-iron', label: game.i18n.localize('DOLMEN.Item.Quality.cold-iron') },
-			{ id: 'silver', label: game.i18n.localize('DOLMEN.Item.Quality.silver') }
-		].map(q => ({
-			...q,
-			checked: this.item.system.qualities?.includes(q.id) || false
-		}))
+		context.weaponSizeChoices = buildChoices('DOLMEN.Item.Size', CHOICE_KEYS.sizes)
+		context.qualityOptions = buildQualityOptions(this.item.system.qualities)
 
 		// Armor choices
-		context.armorBulkChoices = {
-			none: game.i18n.localize('DOLMEN.Item.Bulk.none'),
-			light: game.i18n.localize('DOLMEN.Item.Bulk.light'),
-			medium: game.i18n.localize('DOLMEN.Item.Bulk.medium'),
-			heavy: game.i18n.localize('DOLMEN.Item.Bulk.heavy')
-		}
-
-		context.armorFitChoices = {
-			small: game.i18n.localize('DOLMEN.Item.Fit.small'),
-			medium: game.i18n.localize('DOLMEN.Item.Fit.medium'),
-			large: game.i18n.localize('DOLMEN.Item.Fit.large')
-		}
+		context.armorBulkChoices = buildChoices('DOLMEN.Item.Bulk', CHOICE_KEYS.armorBulks)
+		context.armorFitChoices = buildChoices('DOLMEN.Item.Fit', CHOICE_KEYS.sizes)
 
 		// Foraged choices
-		context.foragedTypeChoices = {
-			plant: game.i18n.localize('DOLMEN.Item.ForagedType.plant'),
-			fungus: game.i18n.localize('DOLMEN.Item.ForagedType.fungus'),
-			pipeleaf: game.i18n.localize('DOLMEN.Item.ForagedType.pipeleaf')
-		}
+		context.foragedTypeChoices = buildChoices('DOLMEN.Item.ForagedType', CHOICE_KEYS.foragedTypes)
 
 		// Spell choices
-		context.spellTypeChoices = {
-			arcane: game.i18n.localize('DOLMEN.Item.SpellType.arcane'),
-			glamour: game.i18n.localize('DOLMEN.Item.SpellType.glamour'),
-			rune: game.i18n.localize('DOLMEN.Item.SpellType.rune'),
-			holy: game.i18n.localize('DOLMEN.Item.SpellType.holy'),
-			knack: game.i18n.localize('DOLMEN.Item.SpellType.knack')
-		}
+		context.spellTypeChoices = buildChoices('DOLMEN.Item.SpellType', CHOICE_KEYS.spellTypes)
 
 		return context
 	}

@@ -142,9 +142,9 @@
 			"Method": "Method",
 			"Current": "Current",
 			"Max": "Max",
-			"Weight": "Weight (Full)",
-			"Treasure": "Weight (Treasure)",
-			"Slots": "Slots"
+			"weight": "Weight (Full)",
+			"treasure": "Weight (Treasure)",
+			"slots": "Slots"
 		},
 		"Coins": {
 			"Title": "Coins",
@@ -155,7 +155,39 @@
 		},
 		"Items": "Items",
 		"Spells": "Spells",
-		"CharacterDetails": "Character Details",
+		"ExtraDetails": {
+			"Title": "Extra Details",
+			"Appearance": "Appearance",
+			"Mannerisms": "Mannerisms",
+			"Head": "Head",
+			"Demeanour": "Demeanour",
+			"Desires": "Desires",
+			"Face": "Face",
+			"Dress": "Dress",
+			"Beliefs": "Beliefs",
+			"Body": "Body",
+			"Fur": "Fur",
+			"Speech": "Speech"
+		},
+		"Physical": {
+			"Title": "Physical Characteristics",
+			"KindredType": "Kindred Type",
+			"Age": "Age",
+			"Lifespan": "Lifespan",
+			"Height": "Height",
+			"Weight": "Weight",
+			"Feet": "(ft)",
+			"Cm": "(cm)",
+			"Lbs": "(lbs)",
+			"Kg": "(kg)",
+			"Imperial": "Imperial",
+			"Metric": "Metric"
+		},
+		"CreatureTypes": {
+			"mortal": "Mortal",
+			"demi-fey": "Demi-fey",
+			"fairy": "Fairy"
+		},
 		"Kindreds": {
 			"breggle": "Breggle",
 			"elf": "Elf",

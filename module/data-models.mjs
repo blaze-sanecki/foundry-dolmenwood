@@ -2,6 +2,58 @@
 const { ArrayField, HTMLField, NumberField, SchemaField, StringField } = foundry.data.fields
 
 /* -------------------------------------------- */
+/*  Schema Helper Functions                     */
+/* -------------------------------------------- */
+
+/**
+ * Create an ability score field with score and modifier.
+ * @returns {SchemaField} Ability score schema field
+ */
+function createAbilityField() {
+	return new SchemaField({
+		score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
+		mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
+	})
+}
+
+/**
+ * Create a save target field.
+ * @returns {NumberField} Save target field
+ */
+function createSaveField() {
+	return new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 10 })
+}
+
+/**
+ * Create all save target fields.
+ * @returns {SchemaField} Schema field containing all saves
+ */
+function createSavesSchema() {
+	return new SchemaField({
+		doom: createSaveField(),
+		ray: createSaveField(),
+		hold: createSaveField(),
+		blast: createSaveField(),
+		spell: createSaveField()
+	})
+}
+
+/**
+ * Create all ability score fields.
+ * @returns {SchemaField} Schema field containing all abilities
+ */
+function createAbilitiesSchema() {
+	return new SchemaField({
+		strength: createAbilityField(),
+		intelligence: createAbilityField(),
+		wisdom: createAbilityField(),
+		dexterity: createAbilityField(),
+		constitution: createAbilityField(),
+		charisma: createAbilityField()
+	})
+}
+
+/* -------------------------------------------- */
 /*  Actor Models                                */
 /* -------------------------------------------- */
 
@@ -28,13 +80,7 @@ class ActorDataModel extends foundry.abstract.TypeDataModel {
 			attack: new NumberField({ required: true, integer: true, initial: 0 }),
 
 			// Save Targets (lower is better)
-			saves: new SchemaField({
-				doom: new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 12 }),
-				ray: new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 13 }),
-				hold: new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 14 }),
-				blast: new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 15 }),
-				spell: new NumberField({ required: true, integer: true, min: 2, max: 19, initial: 16 })
-			}),
+			saves: createSavesSchema(),
 
 			// Speed in feet per round
 			speed: new NumberField({ required: true, integer: true, min: 0, initial: 40 }),
@@ -77,12 +123,28 @@ export class AdventurerDataModel extends ActorDataModel {
 		return 3
 	}
 
+	/**
+	 * Get creature type based on kindred.
+	 * @param {string} kindred - The kindred (race)
+	 * @returns {string} The creature type (fairy, demi-fey, or mortal)
+	 */
+	static getCreatureTypeForKindred(kindred) {
+		const fairyKindreds = ['grimalkin', 'elf']
+		const demiFeyKindreds = ['woodgrue']
+		if (fairyKindreds.includes(kindred)) return 'fairy'
+		if (demiFeyKindreds.includes(kindred)) return 'demi-fey'
+		return 'mortal'
+	}
+
 	/** @override */
 	prepareDerivedData() {
 		// Calculate ability modifiers from scores
 		for (const ability of Object.values(this.abilities)) {
 			ability.mod = AdventurerDataModel.computeModifier(ability.score)
 		}
+
+		// Derive creature type from kindred
+		this.creatureType = AdventurerDataModel.getCreatureTypeForKindred(this.kindred)
 	}
 
 	static defineSchema() {
@@ -90,32 +152,7 @@ export class AdventurerDataModel extends ActorDataModel {
 			...super.defineSchema(),
 			
 			// Ability Scores (3-18, with modifiers)
-			abilities: new SchemaField({
-				strength: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				}),
-				intelligence: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				}),
-				wisdom: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				}),
-				dexterity: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				}),
-				constitution: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				}),
-				charisma: new SchemaField({
-					score: new NumberField({ required: true, integer: true, min: 3, max: 18, initial: 10 }),
-					mod: new NumberField({ required: true, integer: true, min: -3, max: 3, initial: 0 })
-				})
-			}),
+			abilities: createAbilitiesSchema(),
 
 			// Kindred (race)
 			kindred: new StringField({
@@ -194,7 +231,7 @@ export class AdventurerDataModel extends ActorDataModel {
 					required: true,
 					blank: false,
 					initial: "weight",
-					choices: ["weight","treasure", "slots"]
+					choices: ["weight", "treasure", "slots"]
 				}),
 				current: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
 				max: new NumberField({ required: true, integer: true, min: 0, initial: 40 })
@@ -216,6 +253,34 @@ export class AdventurerDataModel extends ActorDataModel {
 				choices: [
 					"demi-fey", "fairy", "mortal"
 				]
+			}),
+
+			// Character details (appearance and personality)
+			details: new SchemaField({
+				head: new StringField({ required: true, blank: true }),
+				demeanour: new StringField({ required: true, blank: true }),
+				desires: new StringField({ required: true, blank: true }),
+				face: new StringField({ required: true, blank: true }),
+				dress: new StringField({ required: true, blank: true }),
+				beliefs: new StringField({ required: true, blank: true }),
+				body: new StringField({ required: true, blank: true }),
+				speech: new StringField({ required: true, blank: true })
+			}),
+
+			// Physical characteristics
+			physical: new SchemaField({
+				unitSystem: new StringField({
+					required: true,
+					blank: false,
+					initial: "imperial",
+					choices: ["imperial", "metric"]
+				}),
+				age: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+				lifespan: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+				heightFeet: new StringField({ required: true, blank: true, initial: "0'0\"" }),
+				heightCm: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+				weightLbs: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+				weightKg: new NumberField({ required: true, integer: true, min: 0, initial: 0 })
 			})
 		}
 	}

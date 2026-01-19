@@ -1,0 +1,161 @@
+/* -------------------------------------------- */
+/*  Item Sheet Styles                           */
+/* -------------------------------------------- */
+
+.sheet.dolmen.item .window-content {
+	padding: 0;
+}
+
+.sheet.dolmen.item .item-header {
+	display: flex;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	background-color: var(--dolmen-color-h1);
+	color: var(--dolmen-color-background);
+}
+
+.sheet.dolmen.item .item-header .item-image {
+	width: 48px;
+	height: 48px;
+	border: 2px solid var(--dolmen-color-background);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.sheet.dolmen.item .item-header .item-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	cursor: pointer;
+	transition: opacity 0.1s;
+}
+
+.sheet.dolmen.item .item-header .item-image img:hover {
+	opacity: 0.8;
+}
+
+.sheet.dolmen.item .item-header .item-title {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.sheet.dolmen.item .item-header .item-title input {
+	background: transparent;
+	border: none;
+	color: var(--dolmen-color-background);
+	font-size: 1.25rem;
+	font-family: var(--dolmen-font-header);
+	font-weight: normal;
+	padding: 0;
+	margin: 0;
+}
+
+.sheet.dolmen.item .item-header .item-title input:focus {
+	outline: none;
+	border-bottom: 1px solid var(--dolmen-color-background);
+}
+
+.sheet.dolmen.item .item-header .item-type {
+	font-size: 0.75rem;
+	opacity: 0.8;
+	text-transform: uppercase;
+}
+
+.sheet.dolmen.item .item-body {
+	padding: 0.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	overflow-y: auto;
+}
+
+.sheet.dolmen.item .item-body section {
+	background-color: var(--dolmen-color-background);
+	border: 2px solid var(--dolmen-color-h1);
+	padding: 0.5rem;
+}
+
+.sheet.dolmen.item .item-body h2 {
+	font-size: 0.8rem;
+	border-bottom: 1px solid var(--dolmen-color-box-border);
+	padding-bottom: 0.25rem;
+	margin-bottom: 0.5rem;
+	margin-top: -0.5rem;
+	margin-left: -0.5rem;
+	padding-top: 0.25rem;
+	padding-left: 0.5rem;
+	width: calc(100% + 1rem);
+	background-color: var(--dolmen-color-h1);
+	color: var(--dolmen-color-background);
+}
+
+.sheet.dolmen.item .item-body .form-row {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.sheet.dolmen.item .item-body .form-field {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.sheet.dolmen.item .item-body .form-field label {
+	font-size: 0.7rem;
+	color: var(--dolmen-color-h3);
+	margin-bottom: 0.125rem;
+}
+
+.sheet.dolmen.item .item-body .form-field input,
+.sheet.dolmen.item .item-body .form-field select {
+	padding: 0.25rem;
+	border: 1px solid var(--dolmen-color-table-border);
+	border-radius: 2px;
+	font-size: 0.85rem;
+}
+
+.sheet.dolmen.item .item-body .form-field input[type="number"] {
+	width: 4rem;
+}
+
+.sheet.dolmen.item .item-body .form-field .unit {
+	font-size: 0.65rem;
+	color: var(--dolmen-color-h3);
+	margin-top: 0.125rem;
+}
+
+.sheet.dolmen.item .item-body .form-group {
+	margin-bottom: 0.5rem;
+}
+
+.sheet.dolmen.item .item-body .form-group>label {
+	font-size: 0.7rem;
+	color: var(--dolmen-color-h3);
+	margin-bottom: 0.25rem;
+	display: block;
+}
+
+.sheet.dolmen.item .item-body .qualities-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.25rem;
+}
+
+.sheet.dolmen.item .item-body .quality-option {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-size: 0.8rem;
+	cursor: pointer;
+}
+
+.sheet.dolmen.item .item-body .quality-option input {
+	margin: 0;
+}
+
+.sheet.dolmen.item .item-body .editor-container {
+	min-height: 100px;
+}

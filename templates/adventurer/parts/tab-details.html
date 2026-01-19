@@ -1,9 +1,96 @@
 <section class="tab-content tab-details {{tab.cssClass}}" data-group="primary" data-tab="details">
-	<!-- Details Section (placeholder for future) -->
-	<section class="character-details boxed-section">
-		<h2>{{localize "DOLMEN.CharacterDetails"}}</h2>
-		<div class="details-container">
-			<!-- Additional character details will be listed here -->
+	<div class="two-columns">
+		<section class="character-details boxed-section">
+			<h2>{{localize "DOLMEN.ExtraDetails.Title"}} - {{localize "DOLMEN.ExtraDetails.Appearance"}}</h2>
+			<div class="extra-grid">
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Head"}}</label>
+					<input type="text" name="system.details.head" value="{{system.details.head}}">
+				</div>
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Face"}}</label>
+					<input type="text" name="system.details.face" value="{{system.details.face}}">
+				</div>
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Dress"}}</label>
+					<input type="text" name="system.details.dress" value="{{system.details.dress}}">
+				</div>
+				<div class="header-field">
+					<label>{{bodyLabel}}</label>
+					<input type="text" name="system.details.body" value="{{system.details.body}}">
+				</div>
+			</div>
+		</section>
+		<section class="character-details boxed-section">
+			<h2>{{localize "DOLMEN.ExtraDetails.Title"}} - {{localize "DOLMEN.ExtraDetails.Mannerisms"}}</h2>
+			<div class="extra-grid">
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Demeanour"}}</label>
+					<input type="text" name="system.details.demeanour" value="{{system.details.demeanour}}">
+				</div>
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Desires"}}</label>
+					<input type="text" name="system.details.desires" value="{{system.details.desires}}">
+				</div>
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Beliefs"}}</label>
+					<input type="text" name="system.details.beliefs" value="{{system.details.beliefs}}">
+				</div>
+				<div class="header-field">
+					<label>{{localize "DOLMEN.ExtraDetails.Speech"}}</label>
+					<input type="text" name="system.details.speech" value="{{system.details.speech}}">
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<section class="physical-characteristics boxed-section">
+		<h2>{{localize "DOLMEN.Physical.Title"}}</h2>
+		<div class="physical-grid" data-unit-system="{{system.physical.unitSystem}}">
+			<div class="physical-field">
+				<label>{{localize "DOLMEN.Physical.KindredType"}}</label>
+				<input type="text" value="{{creatureTypeLabel}}" disabled>
+			</div>
+			<div class="physical-field">
+				<label>{{localize "DOLMEN.Physical.Age"}}</label>
+				<input type="number" name="system.physical.age" value="{{system.physical.age}}" min="0">
+			</div>
+			<div class="physical-field">
+				<label>{{localize "DOLMEN.Physical.Lifespan"}}</label>
+				<input type="number" name="system.physical.lifespan" value="{{system.physical.lifespan}}" min="0">
+			</div>
+			<div class="physical-field">
+				<label>{{localize "DOLMEN.Physical.Height"}} {{#if (eq system.physical.unitSystem "imperial" )}}{{localize "DOLMEN.Physical.Feet"}}{{else}}{{localize "DOLMEN.Physical.Cm"}}{{/if}}</label>
+				<div class="unit-inputs">
+					<span class="imperial-unit">
+						<input type="text" name="system.physical.heightFeet" value="{{system.physical.heightFeet}}" data-convert="height-feet">
+					</span>
+					<span class="metric-unit">
+						<input type="number" name="system.physical.heightCm" value="{{system.physical.heightCm}}" min="0" step="1" data-convert="height-cm">
+					</span>
+				</div>
+			</div>
+			<div class="physical-field">
+				<label>{{localize "DOLMEN.Physical.Weight"}} {{#if (eq system.physical.unitSystem "imperial" )}}{{localize "DOLMEN.Physical.Lbs"}}{{else}}{{localize "DOLMEN.Physical.Kg"}}{{/if}}</label>
+				<div class="unit-inputs">
+					<span class="imperial-unit">
+						<input type="number" name="system.physical.weightLbs" value="{{system.physical.weightLbs}}" min="0" step="1" data-convert="weight-lbs">
+					</span>
+					<span class="metric-unit">
+						<input type="number" name="system.physical.weightKg" value="{{system.physical.weightKg}}" min="0" step="1" data-convert="weight-kg">
+					</span>
+				</div>
+			</div>
+			<div class="physical-field unit-toggle">
+				<label class="radio-label">
+					<input type="radio" name="system.physical.unitSystem" value="imperial" {{#if (eq system.physical.unitSystem "imperial" )}}checked{{/if}}>
+					{{localize "DOLMEN.Physical.Imperial"}}
+				</label>
+				<label class="radio-label">
+					<input type="radio" name="system.physical.unitSystem" value="metric" {{#if (eq system.physical.unitSystem "metric" )}}checked{{/if}}>
+					{{localize "DOLMEN.Physical.Metric"}}
+				</label>
+			</div>
 		</div>
 	</section>
 </section>

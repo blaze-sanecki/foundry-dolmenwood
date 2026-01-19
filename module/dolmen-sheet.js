@@ -1,4 +1,6 @@
 /* global foundry, game, Dialog, FilePicker, CONFIG, ui, Item, Roll, ChatMessage, CONST */
+import { buildChoices, buildChoicesWithBlank, CHOICE_KEYS } from './utils/choices.js'
+
 const TextEditor = foundry.applications.ux.TextEditor
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ActorSheetV2 } = foundry.applications.sheets
@@ -31,7 +33,9 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			openItem: DolmenSheet._onOpenItem,
 			equipItem: DolmenSheet._onEquipItem,
 			stowItem: DolmenSheet._onStowItem,
-			deleteItem: DolmenSheet._onDeleteItem
+			deleteItem: DolmenSheet._onDeleteItem,
+			increaseQty: DolmenSheet._onIncreaseQty,
+			decreaseQty: DolmenSheet._onDecreaseQty
 		},
 		dragDrop: [{ dropSelector: '.item-list' }]
 	}
@@ -109,68 +113,27 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		context.tabs = this._getTabs()
 
 		// Prepare dropdown choices with localized labels
-		context.kindredChoices = {
-			breggle: game.i18n.localize('DOLMEN.Kindreds.breggle'),
-			elf: game.i18n.localize('DOLMEN.Kindreds.elf'),
-			grimalkin: game.i18n.localize('DOLMEN.Kindreds.grimalkin'),
-			human: game.i18n.localize('DOLMEN.Kindreds.human'),
-			mossling: game.i18n.localize('DOLMEN.Kindreds.mossling'),
-			woodgrue: game.i18n.localize('DOLMEN.Kindreds.woodgrue')
-		}
-
+		context.kindredChoices = buildChoices('DOLMEN.Kindreds', CHOICE_KEYS.kindreds)
 		context.classChoices = {
-			bard: game.i18n.localize('DOLMEN.Classes.bard'),
-			cleric: game.i18n.localize('DOLMEN.Classes.cleric'),
-			enchanter: game.i18n.localize('DOLMEN.Classes.enchanter'),
-			fighter: game.i18n.localize('DOLMEN.Classes.fighter'),
-			friar: game.i18n.localize('DOLMEN.Classes.friar'),
-			hunter: game.i18n.localize('DOLMEN.Classes.hunter'),
-			knight: game.i18n.localize('DOLMEN.Classes.knight'),
-			magician: game.i18n.localize('DOLMEN.Classes.magician'),
-			thief: game.i18n.localize('DOLMEN.Classes.thief'),
-			breggle: game.i18n.localize('DOLMEN.Kindreds.breggle'),
-			elf: game.i18n.localize('DOLMEN.Kindreds.elf'),
-			grimalkin: game.i18n.localize('DOLMEN.Kindreds.grimalkin'),
-			mossling: game.i18n.localize('DOLMEN.Kindreds.mossling'),
-			woodgrue: game.i18n.localize('DOLMEN.Kindreds.woodgrue')
+			...buildChoices('DOLMEN.Classes', CHOICE_KEYS.classes),
+			...buildChoices('DOLMEN.Kindreds', CHOICE_KEYS.kindredClasses)
 		}
+		context.alignmentChoices = buildChoices('DOLMEN.Alignments', CHOICE_KEYS.alignments)
+		context.encumbranceChoices = buildChoices('DOLMEN.Encumbrance', CHOICE_KEYS.encumbranceMethods)
+		context.moonNameChoices = buildChoicesWithBlank('DOLMEN.MoonNames', CHOICE_KEYS.moonNames)
+		context.moonPhaseChoices = buildChoicesWithBlank('DOLMEN.MoonPhases', CHOICE_KEYS.moonPhases)
+		context.creatureTypeChoices = buildChoices('DOLMEN.CreatureTypes', CHOICE_KEYS.creatureTypes)
+		context.creatureTypeLabel = game.i18n.localize(`DOLMEN.CreatureTypes.${this.actor.system.creatureType}`)
 
-		context.alignmentChoices = {
-			lawful: game.i18n.localize('DOLMEN.Alignments.lawful'),
-			neutral: game.i18n.localize('DOLMEN.Alignments.neutral'),
-			chaotic: game.i18n.localize('DOLMEN.Alignments.chaotic')
-		}
-
-		context.encumbranceChoices = {
-			weight: game.i18n.localize('DOLMEN.Encumbrance.Weight'),
-			treasure: game.i18n.localize('DOLMEN.Encumbrance.Treasure'),
-			slots: game.i18n.localize('DOLMEN.Encumbrance.Slots')
-		}
-
-		context.moonNameChoices = {
-			none: " ",
-			grinning: game.i18n.localize('DOLMEN.MoonNames.grinning'),
-			dead: game.i18n.localize('DOLMEN.MoonNames.dead'),
-			beast: game.i18n.localize('DOLMEN.MoonNames.beast'),
-			squamous: game.i18n.localize('DOLMEN.MoonNames.squamous'),
-			knights: game.i18n.localize('DOLMEN.MoonNames.knights'),
-			rotting: game.i18n.localize('DOLMEN.MoonNames.rotting'),
-			maidens: game.i18n.localize('DOLMEN.MoonNames.maidens'),
-			witch: game.i18n.localize('DOLMEN.MoonNames.witch'),
-			robbers: game.i18n.localize('DOLMEN.MoonNames.robbers'),
-			goat: game.i18n.localize('DOLMEN.MoonNames.goat'),
-			narrow: game.i18n.localize('DOLMEN.MoonNames.narrow'),
-			black: game.i18n.localize('DOLMEN.MoonNames.black')
-		}
-		context.moonPhaseChoices = {
-			none: " ",
-			waxing: game.i18n.localize('DOLMEN.MoonPhases.waxing'),
-			full: game.i18n.localize('DOLMEN.MoonPhases.full'),
-			waning: game.i18n.localize('DOLMEN.MoonPhases.waning')
-		}
-		
 		// Max extra skills for template conditional
 		context.maxExtraSkills = CONFIG.DOLMENWOOD.maxExtraSkills
+
+		// Determine body/fur label based on kindred
+		const furKindreds = ['breggle', 'grimalkin']
+		const kindred = this.actor.system.kindred
+		context.bodyLabel = furKindreds.includes(kindred)
+			? game.i18n.localize('DOLMEN.ExtraDetails.Fur')
+			: game.i18n.localize('DOLMEN.ExtraDetails.Body')
 
 		// Prepare inventory items grouped by type
 		const items = this.actor.items.contents.filter(i => i.type !== 'Spell')
@@ -289,21 +252,38 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		this.render()
 	}
 
+	/* -------------------------------------------- */
+	/*  Event Listener Setup                        */
+	/* -------------------------------------------- */
+
 	_onRender(context, options) {
 		super._onRender(context, options)
 
-		// Add tab click listeners
-		const tabItems = this.element.querySelectorAll('.tabs .item')
-		tabItems.forEach(tab => {
+		this._setupTabListeners()
+		this._setupXPListener()
+		this._setupPortraitPicker()
+		this._setupSkillListeners()
+		this._setupAttackListeners()
+		this._setupUnitConversionListeners()
+	}
+
+	/**
+	 * Setup tab navigation click listeners.
+	 */
+	_setupTabListeners() {
+		this.element.querySelectorAll('.tabs .item').forEach(tab => {
 			tab.addEventListener('click', (event) => {
 				event.preventDefault()
-				const tabId = event.currentTarget.dataset.tab
-				const group = event.currentTarget.dataset.group
+				const { tab: tabId, group } = event.currentTarget.dataset
 				this._onChangeTab(tabId, group)
 			})
 		})
+	}
 
-		// Add XP button click listener
+	/**
+	 * Setup XP button click listener.
+	 */
+	_setupXPListener() {
 		const xpBtn = this.element.querySelector('.xp-add-btn')
 		if (xpBtn) {
 			xpBtn.addEventListener('click', (event) => {
@@ -311,23 +291,28 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				this._openXPDialog()
 			})
 		}
+	}
 
-		// Add portrait click listener for file picker
+	/**
+	 * Setup portrait image click for file picker.
+	 */
+	_setupPortraitPicker() {
 		const portrait = this.element.querySelector('.portrait-image')
 		if (portrait) {
 			portrait.addEventListener('click', () => {
-				const fp = new FilePicker({
+				new FilePicker({
 					type: 'image',
 					current: this.actor.img,
-					callback: (path) => {
-						this.actor.update({ img: path })
-					}
-				})
-				fp.browse()
+					callback: (path) => this.actor.update({ img: path })
+				}).browse()
 			})
 		}
+	}
 
-		// Add skill button listener
+	/**
+	 * Setup add/remove skill button listeners.
+	 */
+	_setupSkillListeners() {
 		const addSkillBtn = this.element.querySelector('.add-skill-btn')
 		if (addSkillBtn) {
 			addSkillBtn.addEventListener('click', (event) => {
@@ -336,39 +321,85 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			})
 		}
 
-		// Remove skill button listeners
-		const removeSkillBtns = this.element.querySelectorAll('.remove-skill-btn')
-		removeSkillBtns.forEach(btn => {
+		this.element.querySelectorAll('.remove-skill-btn').forEach(btn => {
 			btn.addEventListener('click', (event) => {
 				event.preventDefault()
 				const index = parseInt(event.currentTarget.dataset.skillIndex)
 				this._removeSkill(index)
 			})
 		})
+	}
 
-		// Melee attack icon listener
-		const meleeBtn = this.element.querySelector('.fa-swords.rollable')
-		if (meleeBtn) {
-			meleeBtn.addEventListener('click', (event) => {
-				event.preventDefault()
-				this._onAttackRoll('melee', event)
-			})
-			meleeBtn.addEventListener('contextmenu', (event) => {
-				event.preventDefault()
-				this._onAttackRollContextMenu('melee', event)
-			})
+	/**
+	 * Setup melee and missile attack icon listeners.
+	 */
+	_setupAttackListeners() {
+		const attackButtons = [
+			{ selector: '.fa-swords.rollable', type: 'melee' },
+			{ selector: '.combat .fa-bow-arrow.rollable', type: 'missile' }
+		]
+
+		for (const { selector, type } of attackButtons) {
+			const btn = this.element.querySelector(selector)
+			if (btn) {
+				btn.addEventListener('click', (event) => {
+					event.preventDefault()
+					this._onAttackRoll(type, event)
+				})
+				btn.addEventListener('contextmenu', (event) => {
+					event.preventDefault()
+					this._onAttackRollContextMenu(type, event)
+				})
+			}
+		}
+	}
+
+	/**
+	 * Setup height/weight unit conversion listeners.
+	 */
+	_setupUnitConversionListeners() {
+		const heightFeetInput = this.element.querySelector('[data-convert="height-feet"]')
+		const heightCmInput = this.element.querySelector('[data-convert="height-cm"]')
+		const weightLbsInput = this.element.querySelector('[data-convert="weight-lbs"]')
+		const weightKgInput = this.element.querySelector('[data-convert="weight-kg"]')
+
+		// Height conversion: feet/inches <-> cm
+		if (heightFeetInput && heightCmInput) {
+			const updateCmFromFeetInches = () => {
+				const fIndex = heightFeetInput.value.indexOf("'")
+				const iIndex = heightFeetInput.value.indexOf('"')
+				let feet = 0
+				let inches = 0
+				if(fIndex === -1 && iIndex === -1){
+					feet = parseInt(heightFeetInput.value) || 0
+				}
+				if(fIndex > 0)
+					feet = parseInt(heightFeetInput.value.substring(0, fIndex)) || 0
+				if(iIndex > fIndex)
+					inches = parseInt(heightFeetInput.value.substring(fIndex + 1, iIndex)) || 0
+				const totalInches = feet * 12 + inches
+				heightCmInput.value = Math.round(totalInches * 2.54)
+			}
+
+			const updateFeetInchesFromCm = () => {
+				const cm = parseInt(heightCmInput.value) || 0
+				const totalInches = Math.round(cm / 2.54)
+				heightFeetInput.value = Math.floor(totalInches / 12) + "'" + (totalInches % 12) + '"'
+			}
+
+			heightFeetInput.addEventListener('change', updateCmFromFeetInches)
+			heightCmInput.addEventListener('change', updateFeetInchesFromCm)
 		}
 
-		// Missile attack icon listener
-		const missileBtn = this.element.querySelector('.combat .fa-bow-arrow.rollable')
-		if (missileBtn) {
-			missileBtn.addEventListener('click', (event) => {
-				event.preventDefault()
-				this._onAttackRoll('missile', event)
+		// Weight conversion: lbs <-> kg
+		if (weightLbsInput && weightKgInput) {
+			weightLbsInput.addEventListener('change', (event) => {
+				const lbs = parseInt(event.target.value) || 0
+				weightKgInput.value = Math.round(lbs * 0.453592)
 			})
-			missileBtn.addEventListener('contextmenu', (event) => {
-				event.preventDefault()
-				this._onAttackRollContextMenu('missile', event)
+			weightKgInput.addEventListener('change', (event) => {
+				const kg = parseInt(event.target.value) || 0
+				weightLbsInput.value = Math.round(kg / 0.453592)
 			})
 		}
 	}
@@ -498,6 +529,78 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		this.actor.update({ 'system.extraSkills': currentSkills })
 	}
 
+	/* -------------------------------------------- */
+	/*  Context Menu Utilities                      */
+	/* -------------------------------------------- */
+
+	/**
+	 * Create and display a context menu.
+	 * @param {object} config - Menu configuration
+	 * @param {string} config.html - HTML content for the menu
+	 * @param {object} config.position - Position {top, left}
+	 * @param {Function} config.onItemClick - Callback when menu item clicked, receives (menuItem, menu)
+	 * @param {Element} [config.excludeFromClose] - Element to exclude from close detection
+	 * @returns {HTMLElement} The menu element
+	 */
+	_createContextMenu({ html, position, onItemClick, excludeFromClose = null }) {
+		// Remove any existing context menu
+		document.querySelector('.dolmen-weapon-context-menu')?.remove()
+
+		// Create the menu element
+		const menu = document.createElement('div')
+		menu.className = 'dolmen-weapon-context-menu'
+		menu.innerHTML = html
+
+		// Position the menu
+		menu.style.position = 'fixed'
+		menu.style.top = `${position.top}px`
+		menu.style.left = `${position.left}px`
+
+		// Add to sheet
+		this.element.appendChild(menu)
+
+		// Adjust position after rendering (menu appears to left of click point)
+		const menuRect = menu.getBoundingClientRect()
+		menu.style.left = `${position.left - menuRect.width - 5}px`
+
+		// Add click handlers to menu items
+		menu.querySelectorAll('.weapon-menu-item').forEach(item => {
+			item.addEventListener('click', () => onItemClick(item, menu))
+		})
+
+		// Close menu when clicking outside
+		const closeMenu = (e) => {
+			const clickedOutside = !menu.contains(e.target)
+			const clickedExcluded = excludeFromClose && e.target === excludeFromClose
+			if (clickedOutside && !clickedExcluded) {
+				menu.remove()
+				document.removeEventListener('click', closeMenu)
+			}
+		}
+		setTimeout(() => document.addEventListener('click', closeMenu), 0)
+
+		return menu
+	}
+
+	/**
+	 * Build HTML for weapon selection menu items.
+	 * @param {Item[]} weapons - Array of weapons
+	 * @returns {string} HTML string
+	 */
+	_buildWeaponMenuHtml(weapons) {
+		return weapons.map(w => `
+			<div class="weapon-menu-item" data-weapon-id="${w.id}">
+				<img src="${w.img}" alt="${w.name}" class="weapon-icon">
+				<span class="weapon-name">${w.name}</span>
+				<span class="weapon-damage">${w.system.damage}</span>
+			</div>
+		`).join('')
+	}
+
+	/* -------------------------------------------- */
+	/*  Attack Roll Methods                         */
+	/* -------------------------------------------- */
+
 	/**
 	 * Get equipped weapons that have a specific quality.
 	 * @param {string} quality - The weapon quality to filter by ('melee' or 'missile')
@@ -562,17 +665,10 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	 * @param {object} position - Position object with top and left properties
 	 */
 	_openRollTypeContextMenu(weapons, attackType, position) {
-		// Remove any existing context menu
-		document.querySelector('.dolmen-weapon-context-menu')?.remove()
-
-		// Create the context menu element
-		const menu = document.createElement('div')
-		menu.className = 'dolmen-weapon-context-menu'
-
 		const attackOnlyLabel = game.i18n.localize('DOLMEN.Attack.RollAttackOnly')
 		const damageOnlyLabel = game.i18n.localize('DOLMEN.Attack.RollDamageOnly')
 
-		menu.innerHTML = `
+		const html = `
 			<div class="weapon-menu-item" data-roll-type="attack">
 				<i class="fas fa-dice-d20"></i>
 				<span class="weapon-name">${attackOnlyLabel}</span>
@@ -583,46 +679,24 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			</div>
 		`
 
-		// Position the menu
-		menu.style.position = 'fixed'
-		menu.style.top = `${position.top}px`
-		menu.style.left = `${position.left}px`
-
-		// Add to document
-		document.getElementsByClassName('dolmen sheet')[0].appendChild(menu)
-
-		// Adjust position after rendering
-		const menuRect = menu.getBoundingClientRect()
-		menu.style.left = `${position.left - menuRect.width - 5}px`
-
-		// Add click handlers
-		menu.querySelectorAll('.weapon-menu-item').forEach(item => {
-			item.addEventListener('click', () => {
+		this._createContextMenu({
+			html,
+			position,
+			onItemClick: (item, menu) => {
 				const rollType = item.dataset.rollType
 				menu.remove()
 
 				if (weapons.length === 1) {
-					// Single weapon - roll immediately
 					if (rollType === 'attack') {
 						this._rollAttackOnly(weapons[0], attackType)
 					} else if (rollType === 'damage') {
 						this._rollDamageOnly(weapons[0], attackType)
 					}
 				} else {
-					// Multiple weapons - show weapon selection
 					setTimeout(() => this._openWeaponSelectionMenu(weapons, attackType, rollType, position), 0)
 				}
-			})
-		})
-
-		// Close menu when clicking outside
-		const closeMenu = (e) => {
-			if (!menu.contains(e.target)) {
-				menu.remove()
-				document.removeEventListener('click', closeMenu)
 			}
-		}
-		setTimeout(() => document.addEventListener('click', closeMenu), 0)
+		})
 	}
 
 	/**
@@ -633,41 +707,11 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	 * @param {object} position - Position object with top and left properties
 	 */
 	_openWeaponSelectionMenu(weapons, attackType, rollType, position) {
-		// Remove any existing context menu
-		document.querySelector('.dolmen-weapon-context-menu')?.remove()
-
-		// Create the context menu element
-		const menu = document.createElement('div')
-		menu.className = 'dolmen-weapon-context-menu'
-
-		// Build menu items
-		const menuItems = weapons.map(w => `
-			<div class="weapon-menu-item" data-weapon-id="${w.id}">
-				<img src="${w.img}" alt="${w.name}" class="weapon-icon">
-				<span class="weapon-name">${w.name}</span>
-				<span class="weapon-damage">${w.system.damage}</span>
-			</div>
-		`).join('')
-
-		menu.innerHTML = menuItems
-
-		// Position the menu
-		menu.style.position = 'fixed'
-		menu.style.top = `${position.top}px`
-		menu.style.left = `${position.left}px`
-
-		// Add to document
-		document.getElementsByClassName('dolmen sheet')[0].appendChild(menu)
-
-		// Adjust position after rendering
-		const menuRect = menu.getBoundingClientRect()
-		menu.style.left = `${position.left - menuRect.width - 5}px`
-
-		// Add click handlers to weapon items
-		menu.querySelectorAll('.weapon-menu-item').forEach(item => {
-			item.addEventListener('click', () => {
-				const weaponId = item.dataset.weaponId
-				const weapon = this.actor.items.get(weaponId)
+		this._createContextMenu({
+			html: this._buildWeaponMenuHtml(weapons),
+			position,
+			onItemClick: (item, menu) => {
+				const weapon = this.actor.items.get(item.dataset.weaponId)
 				if (weapon) {
 					if (rollType === 'attack') {
 						this._rollAttackOnly(weapon, attackType)
@@ -676,17 +720,8 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 					}
 				}
 				menu.remove()
-			})
-		})
-
-		// Close menu when clicking outside
-		const closeMenu = (e) => {
-			if (!menu.contains(e.target)) {
-				menu.remove()
-				document.removeEventListener('click', closeMenu)
 			}
-		}
-		setTimeout(() => document.addEventListener('click', closeMenu), 0)
+		})
 	}
 
 	/**
@@ -696,108 +731,106 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	 * @param {Event} event - The click event for positioning
 	 */
 	_openWeaponContextMenu(weapons, attackType, event) {
-		// Remove any existing weapon context menu
-		document.querySelector('.dolmen-weapon-context-menu')?.remove()
-
-		// Create the context menu element
-		const menu = document.createElement('div')
-		menu.className = 'dolmen-weapon-context-menu'
-
-		// Build menu items
-		const menuItems = weapons.map(w => `
-			<div class="weapon-menu-item" data-weapon-id="${w.id}">
-				<img src="${w.img}" alt="${w.name}" class="weapon-icon">
-				<span class="weapon-name">${w.name}</span>
-				<span class="weapon-damage">${w.system.damage}</span>
-			</div>
-		`).join('')
-
-		menu.innerHTML = menuItems
-
-		// Position the menu to the left of the clicked icon
 		const iconRect = event.currentTarget.getBoundingClientRect()
-		menu.style.position = 'fixed'
-		menu.style.top = `${iconRect.top}px`
-		menu.style.left = `${iconRect.left}px`
 
-		// Add to document
-		document.getElementsByClassName('dolmen sheet')[0].appendChild(menu)
-
-		// Adjust position after rendering to account for menu width
-		const menuRect = menu.getBoundingClientRect()
-		menu.style.left = `${iconRect.left - menuRect.width - 5}px`
-
-		// Add click handlers to menu items
-		menu.querySelectorAll('.weapon-menu-item').forEach(item => {
-			item.addEventListener('click', () => {
-				const weaponId = item.dataset.weaponId
-				const weapon = this.actor.items.get(weaponId)
+		this._createContextMenu({
+			html: this._buildWeaponMenuHtml(weapons),
+			position: { top: iconRect.top, left: iconRect.left },
+			excludeFromClose: event.currentTarget,
+			onItemClick: (item, menu) => {
+				const weapon = this.actor.items.get(item.dataset.weaponId)
 				if (weapon) {
 					this._rollAttack(weapon, attackType)
 				}
 				menu.remove()
-			})
-		})
-
-		// Close menu when clicking outside
-		const closeMenu = (e) => {
-			if (!menu.contains(e.target) && e.target !== event.currentTarget) {
-				menu.remove()
-				document.removeEventListener('click', closeMenu)
 			}
-		}
-		setTimeout(() => document.addEventListener('click', closeMenu), 0)
+		})
 	}
 
 	/**
-	 * Perform an attack roll with a weapon.
-	 * @param {Item} weapon - The weapon to attack with
+	 * Get attack modifiers for a given attack type.
 	 * @param {string} attackType - Either 'melee' or 'missile'
+	 * @returns {object} Object containing attackMod, abilityMod, and totalMod
 	 */
-	async _rollAttack(weapon, attackType) {
+	_getAttackModifiers(attackType) {
 		const system = this.actor.system
 		const attackMod = system.attack || 0
 		const abilityMod = attackType === 'melee'
 			? system.abilities.strength.mod
 			: system.abilities.dexterity.mod
-		const abilityName = attackType === 'melee'
-			? game.i18n.localize('DOLMEN.Abilities.StrengthShort')
-			: game.i18n.localize('DOLMEN.Abilities.DexterityShort')
+		return {
+			attackMod,
+			abilityMod,
+			totalMod: attackMod + abilityMod
+		}
+	}
 
-		const totalMod = attackMod + abilityMod
+	/**
+	 * Build the attack roll formula string.
+	 * @param {number} totalMod - Total modifier to apply
+	 * @returns {string} Roll formula like "1d20 + 3" or "1d20 - 1"
+	 */
+	_buildAttackFormula(totalMod) {
+		return totalMod >= 0 ? `1d20 + ${totalMod}` : `1d20 - ${Math.abs(totalMod)}`
+	}
 
-		// Build attack roll formula
-		const attackFormula = totalMod >= 0 ? `1d20 + ${totalMod}` : `1d20 - ${Math.abs(totalMod)}`
-		const attackRoll = new Roll(attackFormula)
-		await attackRoll.evaluate()
-
-		// Build damage roll
-		const damageRoll = new Roll(weapon.system.damage)
-		await damageRoll.evaluate()
-
-		// Determine if this is a natural 20 (critical) or natural 1 (fumble)
+	/**
+	 * Get critical/fumble state from an attack roll.
+	 * @param {Roll} attackRoll - The evaluated attack roll
+	 * @returns {object} Object with resultClass and resultLabel
+	 */
+	_getAttackResultState(attackRoll) {
 		const d20Result = attackRoll.dice[0].results[0].result
-		const isCritical = d20Result === 20
-		const isFumble = d20Result === 1
+		if (d20Result === 20) {
+			return {
+				resultClass: 'critical',
+				resultLabel: `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Critical')}</span>`
+			}
+		} else if (d20Result === 1) {
+			return {
+				resultClass: 'fumble',
+				resultLabel: `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Fumble')}</span>`
+			}
+		}
+		return { resultClass: '', resultLabel: '' }
+	}
 
-		// Build chat message content
+	/**
+	 * Build chat message HTML for attack rolls.
+	 * @param {object} config - Configuration object
+	 * @param {Item} config.weapon - The weapon used
+	 * @param {string} config.attackType - 'melee' or 'missile'
+	 * @param {object} [config.attack] - Attack roll data (anchor, formula, resultClass, resultLabel)
+	 * @param {object} [config.damage] - Damage roll data (anchor, formula)
+	 * @returns {string} HTML content for the chat message
+	 */
+	_buildAttackChatHtml({ weapon, attackType, attack, damage }) {
 		const attackTypeName = game.i18n.localize(`DOLMEN.Item.Quality.${attackType}`)
-		const modBreakdown = `${game.i18n.localize('DOLMEN.Combat.AttackShort')}: ${attackMod >= 0 ? '+' : ''}${attackMod}, ${abilityName}: ${abilityMod >= 0 ? '+' : ''}${abilityMod}`
 
-		// Create inline roll anchors using Foundry's built-in method
-		const attackRollAnchor = await attackRoll.toAnchor({ classes: ['attack-inline-roll'] })
-		const damageRollAnchor = await damageRoll.toAnchor({ classes: ['damage-inline-roll'] })
-		let resultClass = ''
-		let resultLabel = ''
-		if (isCritical) {
-			resultClass = 'critical'
-			resultLabel = `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Critical')}</span>`
-		} else if (isFumble) {
-			resultClass = 'fumble'
-			resultLabel = `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Fumble')}</span>`
+		let rollSections = ''
+		if (attack) {
+			rollSections += `
+				<div class="roll-section attack-section ${attack.resultClass}">
+					<label>${game.i18n.localize('DOLMEN.Attack.AttackRoll')}</label>
+					<div class="roll-result">
+						${attack.anchor.outerHTML}
+						${attack.resultLabel}
+					</div>
+					<span class="roll-breakdown">${attack.formula}</span>
+				</div>`
+		}
+		if (damage) {
+			rollSections += `
+				<div class="roll-section damage-section">
+					<label>${game.i18n.localize('DOLMEN.Attack.DamageRoll')}</label>
+					<div class="roll-result">
+						${damage.anchor.outerHTML}
+					</div>
+					<span class="roll-breakdown">${damage.formula}</span>
+				</div>`
 		}
 
-		const chatContent = `
+		return `
 			<div class="dolmen attack-roll">
 				<div class="attack-header">
 					<img src="${weapon.img}" alt="${weapon.name}" class="weapon-icon">
@@ -806,33 +839,76 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 						<span class="attack-type">${attackTypeName}</span>
 					</div>
 				</div>
-				<div class="roll-results">
-					<div class="roll-section attack-section ${resultClass}">
-						<label>${game.i18n.localize('DOLMEN.Attack.AttackRoll')}</label>
-						<div class="roll-result">
-							${attackRollAnchor.outerHTML}
-							${resultLabel}
-						</div>
-						<span class="roll-breakdown">${attackFormula}</span>
-					</div>
-					<div class="roll-section damage-section">
-						<label>${game.i18n.localize('DOLMEN.Attack.DamageRoll')}</label>
-						<div class="roll-result">
-							${damageRollAnchor.outerHTML}
-						</div>
-						<span class="roll-breakdown">${weapon.system.damage}</span>
-					</div>
-				</div>
+				<div class="roll-results">${rollSections}</div>
 			</div>
 		`
+	}
 
-		// Create chat message
+	/**
+	 * Unified attack roll method supporting attack-only, damage-only, or both.
+	 * @param {Item} weapon - The weapon to use
+	 * @param {string} attackType - Either 'melee' or 'missile'
+	 * @param {object} [options] - Roll options
+	 * @param {boolean} [options.attackOnly=false] - Only roll attack (no damage)
+	 * @param {boolean} [options.damageOnly=false] - Only roll damage (no attack)
+	 */
+	async _performAttackRoll(weapon, attackType, { attackOnly = false, damageOnly = false } = {}) {
+		const rolls = []
+		let attackData = null
+		let damageData = null
+
+		// Handle attack roll
+		if (!damageOnly) {
+			const { totalMod } = this._getAttackModifiers(attackType)
+			const formula = this._buildAttackFormula(totalMod)
+			const roll = new Roll(formula)
+			await roll.evaluate()
+			rolls.push(roll)
+
+			const { resultClass, resultLabel } = this._getAttackResultState(roll)
+			attackData = {
+				anchor: await roll.toAnchor({ classes: ['attack-inline-roll'] }),
+				formula,
+				resultClass,
+				resultLabel
+			}
+		}
+
+		// Handle damage roll
+		if (!attackOnly) {
+			const roll = new Roll(weapon.system.damage)
+			await roll.evaluate()
+			rolls.push(roll)
+
+			damageData = {
+				anchor: await roll.toAnchor({ classes: ['damage-inline-roll'] }),
+				formula: weapon.system.damage
+			}
+		}
+
+		// Build and send chat message
+		const chatContent = this._buildAttackChatHtml({
+			weapon,
+			attackType,
+			attack: attackData,
+			damage: damageData
+		})
+
 		await ChatMessage.create({
 			speaker: ChatMessage.getSpeaker({ actor: this.actor }),
 			content: chatContent,
-			rolls: [attackRoll, damageRoll],
+			rolls,
 			type: CONST.CHAT_MESSAGE_STYLES.OTHER
 		})
+	}
+
+	/**
+	 * Perform a full attack roll with a weapon (attack + damage).
+	 * @param {Item} weapon - The weapon to attack with
+	 * @param {string} attackType - Either 'melee' or 'missile'
+	 */
+	async _rollAttack(weapon, attackType) {
+		return this._performAttackRoll(weapon, attackType)
 	}
 
 	/**
@@ -841,68 +917,7 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	 * @param {string} attackType - Either 'melee' or 'missile'
 	 */
 	async _rollAttackOnly(weapon, attackType) {
-		const system = this.actor.system
-		const attackMod = system.attack || 0
-		const abilityMod = attackType === 'melee'
-			? system.abilities.strength.mod
-			: system.abilities.dexterity.mod
-
-		const totalMod = attackMod + abilityMod
-
-		// Build attack roll formula
-		const attackFormula = totalMod >= 0 ? `1d20 + ${totalMod}` : `1d20 - ${Math.abs(totalMod)}`
-		const attackRoll = new Roll(attackFormula)
-		await attackRoll.evaluate()
-
-		// Determine if this is a natural 20 (critical) or natural 1 (fumble)
-		const d20Result = attackRoll.dice[0].results[0].result
-		const isCritical = d20Result === 20
-		const isFumble = d20Result === 1
-
-		// Build chat message content
-		const attackTypeName = game.i18n.localize(`DOLMEN.Item.Quality.${attackType}`)
-
-		// Create inline roll anchor
-		const attackRollAnchor = await attackRoll.toAnchor({ classes: ['attack-inline-roll'] })
-		let resultClass = ''
-		let resultLabel = ''
-		if (isCritical) {
-			resultClass = 'critical'
-			resultLabel = `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Critical')}</span>`
-		} else if (isFumble) {
-			resultClass = 'fumble'
-			resultLabel = `<span class="roll-label">${game.i18n.localize('DOLMEN.Attack.Fumble')}</span>`
-		}
-
-		const chatContent = `
-			<div class="dolmen attack-roll">
-				<div class="attack-header">
-					<img src="${weapon.img}" alt="${weapon.name}" class="weapon-icon">
-					<div class="attack-info">
-						<h3>${weapon.name}</h3>
-						<span class="attack-type">${attackTypeName}</span>
-					</div>
-				</div>
-				<div class="roll-results">
-					<div class="roll-section attack-section ${resultClass}">
-						<label>${game.i18n.localize('DOLMEN.Attack.AttackRoll')}</label>
-						<div class="roll-result">
-							${attackRollAnchor.outerHTML}
-							${resultLabel}
-						</div>
-						<span class="roll-breakdown">${attackFormula}</span>
-					</div>
-				</div>
-			</div>
-		`
-
-		// Create chat message
-		await ChatMessage.create({
-			speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-			content: chatContent,
-			rolls: [attackRoll],
-			type: CONST.CHAT_MESSAGE_STYLES.OTHER
-		})
+		return this._performAttackRoll(weapon, attackType, { attackOnly: true })
 	}
 
 	/**
@@ -911,44 +926,7 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	 * @param {string} attackType - Either 'melee' or 'missile'
 	 */
 	async _rollDamageOnly(weapon, attackType) {
-		// Build damage roll
-		const damageRoll = new Roll(weapon.system.damage)
-		await damageRoll.evaluate()
-
-		// Build chat message content
-		const attackTypeName = game.i18n.localize(`DOLMEN.Item.Quality.${attackType}`)
-
-		// Create inline roll anchor
-		const damageRollAnchor = await damageRoll.toAnchor({ classes: ['damage-inline-roll'] })
-
-		const chatContent = `
-			<div class="dolmen attack-roll">
-				<div class="attack-header">
-					<img src="${weapon.img}" alt="${weapon.name}" class="weapon-icon">
-					<div class="attack-info">
-						<h3>${weapon.name}</h3>
-						<span class="attack-type">${attackTypeName}</span>
-					</div>
-				</div>
-				<div class="roll-results">
-					<div class="roll-section damage-section">
-						<label>${game.i18n.localize('DOLMEN.Attack.DamageRoll')}</label>
-						<div class="roll-result">
-							${damageRollAnchor.outerHTML}
-						</div>
-						<span class="roll-breakdown">${weapon.system.damage}</span>
-					</div>
-				</div>
-			</div>
-		`
-
-		// Create chat message
-		await ChatMessage.create({
-			speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-			content: chatContent,
-			rolls: [damageRoll],
-			type: CONST.CHAT_MESSAGE_STYLES.OTHER
-		})
+		return this._performAttackRoll(weapon, attackType, { damageOnly: true })
 	}
 
 	static _onAddSkill(_event, _target) {
@@ -995,6 +973,30 @@ class DolmenSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				})
 				if (confirmed) {
 					await item.delete()
+				}
+			}
+		}
+	}
+
+	static async _onIncreaseQty(_event, target) {
+		const itemId = target.dataset.itemId
+		if (itemId) {
+			const item = this.actor.items.get(itemId)
+			if (item) {
+				const currentQty = item.system.quantity || 1
+				await item.update({ 'system.quantity': currentQty + 1 })
+			}
+		}
+	}
+
+	static async _onDecreaseQty(_event, target) {
+		const itemId = target.dataset.itemId
+		if (itemId) {
+			const item = this.actor.items.get(itemId)
+			if (item) {
+				const currentQty = item.system.quantity || 1
+				if (currentQty > 1) {
+					await item.update({ 'system.quantity': currentQty - 1 })
 				}
 			}
 		}
